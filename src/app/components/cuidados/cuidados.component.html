@@ -1,0 +1,42 @@
+<div class="flex flex-col mt-8">
+    <div *ngFor="let care of cares" class="flex justify-center mb-3">
+        <div class="flex border-2 border-pink-900 px-5 py-2 w-3/5">
+            <div class="flex flex-col justify-items-start w-1/2">
+                <div>{{care.parentName}}</div>
+                <div>{{care.caretakerName}}</div>
+                <div>{{care.observations}}</div>
+            </div>
+            <div class="flex flex-col justify-items-end w-1/2">
+                <div>{{formatDate(care.startDate)}}</div>
+                <div>{{getHours(care.duration)}}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div>
+    <div class="flex items-center justify-center">
+        <span>
+            Balance
+            <div *ngFor="let balance of balances" class="flex space-x-4">
+                <div>{{balance.parentName}}</div>
+                <div [ngClass]="balance.min < 0 ? 'text-pink-700' : 'text-green-600'">{{getHours(balance.min)}}
+                </div>
+            </div>
+        </span>
+    </div>
+</div>
+
+<div>
+    <div class="flex items-center justify-center mt-4 mb-4">
+        <span>
+            Deudas de tiempo:
+            <div *ngFor="let deuda of deudasTiempo" class="flex space-x-4">
+                <div *ngIf="deuda.duration > 0 ">{{deuda.debe.name}} -> {{deuda.aQuienDebe.name}}</div>
+                <div *ngIf="deuda.duration < 0 ">{{deuda.aQuienDebe.name}} -> {{deuda.debe.name}}</div>
+                <div *ngIf="deuda.duration != 0">{{getHoursAbs(deuda.duration)}}</div>
+                <div></div>
+            </div>
+        </span>
+    </div>
+</div>

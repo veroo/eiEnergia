@@ -1,12 +1,4 @@
-export interface CaresInterface {
-    caretakerId: number;
-    caretakerName: string;
-    duration: number;
-    observations: string;
-    parentId: number;
-    parentName: string;
-    startDate: string;
-}
+import { CaresInterface } from "../app/interfaces/interfaces.interface";
 
 export const cares: CaresInterface[] = [
     {

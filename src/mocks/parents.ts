@@ -1,7 +1,5 @@
-export interface ParentsInterface {
-    id: number;
-    name: string;
-}
+import { ParentsInterface } from "../app/interfaces/interfaces.interface";
+
 
 export const parents: ParentsInterface[] = [
     {

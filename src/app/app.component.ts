@@ -1,18 +1,11 @@
-import { parents, ParentsInterface } from './../mocks/parents';
-import { cares, CaresInterface } from './../mocks/cares';
+import { parents } from './../mocks/parents';
 import { Component } from '@angular/core';
-import { DateTime } from 'luxon';
+import { CaresInterface, ParentsInterface } from './interfaces/interfaces.interface';
+import { cares } from '../mocks/cares';
+import { Subscription } from 'rxjs';
+import { SharedService } from './services/data.service';
 
-interface BalanceInterface {
-  min: number;
-  parentName: string;
-}
 
-interface DeudasTiempoInterface {
-  debe: ParentsInterface;
-  aQuienDebe: ParentsInterface;
-  duration: number;
-}
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -22,14 +15,19 @@ export class AppComponent {
   title = 'ei-energia';
   cares: CaresInterface[] = [];
   parents: ParentsInterface[] = [];
-  balances: BalanceInterface[] = [];
   newParent: boolean = false;
   newCare: boolean = false;
+  subscriptionParent: Subscription;
+  subscriptionCare: Subscription;
   nameParent: string = '';
   newCareData = {} as CaresInterface;
   caretaker = {} as ParentsInterface;
-  parentName = {} as ParentsInterface;;
-  deudasTiempo: DeudasTiempoInterface[] = []
+  parentName = {} as ParentsInterface;
+
+  constructor(private sharedService: SharedService) {
+    this.subscriptionParent = this.sharedService.currentParent.subscribe(flag => this.newParent = flag)
+    this.subscriptionCare = this.sharedService.currentCare.subscribe(flag => this.newCare = flag)
+  }
 
   ngOnInit(): void {
     //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
@@ -37,132 +35,64 @@ export class AppComponent {
     const caresStorage = localStorage.getItem('cares');
     const parentsStorage = localStorage.getItem('parents');
     if (caresStorage != null) {
-      this.sortCares(JSON.parse(caresStorage));
+      this.cares = JSON.parse(caresStorage);
     } else {
-      this.sortCares(cares);
+      this.cares = [...cares];
     }
     if (parentsStorage != null) {
       this.parents = JSON.parse(parentsStorage);
     } else {
-      this.parents = parents;
+      this.parents = [...parents];
     }
 
-    this.balance();
+  }
+
+  ngOnDestroy() {
+    this.subscriptionParent.unsubscribe();
+    this.subscriptionCare.unsubscribe();
+  }
+
+  clearData() {
+    this.sharedService.changeParent(false);
+    this.sharedService.changeCare(false);
+    this.nameParent = '';
+    this.newCareData = {} as CaresInterface;
+    this.caretaker = {} as ParentsInterface;
+    this.parentName = {} as ParentsInterface;
+    this.cares = [...cares];
+    console.log("🚀 ~ file: app.component.ts ~ line 63 ~ AppComponent ~ clearData ~ cares", cares)
+    this.parents = [...parents];
+    console.log("🚀 ~ file: app.component.ts ~ line 65 ~ AppComponent ~ clearData ~ parents", parents)
+    localStorage.setItem('cares', JSON.stringify(cares));
+    localStorage.setItem('parents', JSON.stringify(parents));
   }
 
   changeStateNewParent() {
-    this.newParent = !this.newParent;
-    this.newCare = false;
+    this.sharedService.changeParent(!this.newParent);
+    this.sharedService.changeCare(false);
     this.nameParent = '';
   }
 
   changeStateNewCare() {
-    this.newCare = !this.newCare;
-    this.newParent = false;
+    this.sharedService.changeParent(false);
+    this.sharedService.changeCare(!this.newCare);
     this.newCareData = {} as CaresInterface;
     this.caretaker = {} as ParentsInterface;
     this.parentName = {} as ParentsInterface;
   }
 
-  sortCares(caresToOrder: CaresInterface[]) {
-    this.cares = caresToOrder.sort((a, b) => {
-      const dateA: any = new Date(a.startDate);
-      const dateB: any = new Date(b.startDate);
-      return dateB - dateA;
-    });
-  }
-
-  getHours(min: number) {
-    const hour = Math.trunc(min / 60);
-    const minutes = min % 60;
-    return `${hour}h ${minutes} min`;
-  }
-
-  getHoursAbs(min: number) {
-    return this.getHours(Math.abs(min));
-  }
-
-  formatDate(date: string) {
-    const dt = DateTime.fromISO(date);
-    return `${dt.toLocaleString()} ${dt.toFormat('T')}`;
-  }
-
-  balance() {
-    this.balances = [];
-    this.deudasTiempo = [];
-    this.cares.map(care => {
-      if (this.balances[care.caretakerId]) {
-        this.balances[care.caretakerId].min = (this.balances[care.caretakerId].min ? this.balances[care.caretakerId].min : 0) + care.duration;
-        //this.balances[care.caretakerId].parentName = care.caretakerName;
-      } else {
-        this.balances[care.caretakerId] = {
-          min: care.duration,
-          parentName: care.caretakerName
-        }
-      }
-      if (this.balances[care.parentId]) {
-        this.balances[care.parentId].min = (this.balances[care.parentId].min ? this.balances[care.parentId].min : 0) - care.duration;
-        //this.balances[care.parentId].parentName = care.parentName;
-      } else {
-        this.balances[care.parentId] = {
-          min: - care.duration,
-          parentName: care.parentName
-        }
-      }
-      let encontrado = false;
-      let i = 0;
-      while (!encontrado && this.deudasTiempo.length > i) {
-        const deuda = this.deudasTiempo[i];
-        if (deuda.debe.id === care.parentId && deuda.aQuienDebe.id === care.caretakerId) {
-          deuda.duration = deuda.duration + care.duration;
-          encontrado = true;
-        }
-        if (deuda.debe.id === care.caretakerId && deuda.aQuienDebe.id === care.parentId) {
-          deuda.duration = deuda.duration - care.duration;
-          encontrado = true;
-        }
-        i++;
-      }
-      if (!encontrado) {
-        const debe: ParentsInterface = {
-          id: care.parentId,
-          name: care.parentName
-        }
-        const aQuienDebe: ParentsInterface = {
-          id: care.caretakerId,
-          name: care.caretakerName
-        }
-        const deuda: DeudasTiempoInterface = {
-          debe: debe,
-          aQuienDebe: aQuienDebe,
-          duration: care.duration
-        }
-        this.deudasTiempo.push(deuda);
-      }
-    });
-  }
-
-  addNewParent() {
-    const parent: ParentsInterface = {
-      id: parents.length,
-      name: this.nameParent
-    }
-    parents.push(parent);
-    localStorage.setItem('parents', JSON.stringify(this.parents))
-    this.newParent = false;
-  }
-
-  addNewCare() {
-    this.newCareData.caretakerId = this.caretaker.id;
-    this.newCareData.caretakerName = this.caretaker.name;
-    this.newCareData.parentId = this.parentName.id;
-    this.newCareData.parentName = this.parentName.name;
-
-    this.cares.push(this.newCareData);
+  addNewCare(event: any) {
+    this.cares.push(event);
     localStorage.setItem('cares', JSON.stringify(this.cares));
-    this.newCare = false;
-    this.sortCares(this.cares);
-    this.balance();
+  }
+
+  addNewParent(event: any) {
+    const parent: ParentsInterface = {
+      id: this.parents.length,
+      name: event
+    }
+    this.parents.push(parent);
+    localStorage.setItem('parents', JSON.stringify(this.parents));
   }
 
 }

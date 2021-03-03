@@ -16,118 +16,21 @@
       Añadir Cuidado
     </button>
   </div>
+  <div>
+    <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full" (click)="clearData()">
+      Limpiar
+    </button>
+  </div>
 </div>
 
 <div *ngIf="!newParent && !newCare">
-  <div class="flex flex-col mt-8">
-    <div *ngFor="let care of cares" class="flex justify-center mb-3">
-      <div class="flex border-2 border-pink-900 px-5 py-2 w-3/5">
-        <div class="flex flex-col justify-items-start w-1/2">
-          <div>{{care.parentName}}</div>
-          <div>{{care.caretakerName}}</div>
-          <div>{{care.observations}}</div>
-        </div>
-        <div class="flex flex-col justify-items-end w-1/2">
-          <div>{{formatDate(care.startDate)}}</div>
-          <div>{{getHours(care.duration)}}</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div>
-    <div class="flex items-center justify-center">
-      <span>
-        Balance
-        <div *ngFor="let balance of balances" class="flex space-x-4">
-          <div>{{balance.parentName}}</div>
-          <div [ngClass]="balance.min < 0 ? 'text-pink-700' : 'text-green-600'">{{getHours(balance.min)}}</div>
-        </div>
-      </span>
-    </div>
-  </div>
-
-  <div>
-    <div class="flex items-center justify-center">
-      <span>
-        Deudas de tiempo:
-        <div *ngFor="let deuda of deudasTiempo" class="flex space-x-4">
-          <div *ngIf="deuda.duration > 0 ">{{deuda.debe.name}} -> {{deuda.aQuienDebe.name}}</div>
-          <div *ngIf="deuda.duration < 0 ">{{deuda.aQuienDebe.name}} -> {{deuda.debe.name}}</div>
-          <div *ngIf="deuda.duration != 0">{{getHoursAbs(deuda.duration)}}</div>
-          <div></div>
-        </div>
-      </span>
-    </div>
-  </div>
+  <app-cuidados [cares]="cares"></app-cuidados>
 </div>
 
 <div *ngIf="newParent">
-  <div class="flex justify-center mt-4">
-    <label>
-      <span class="text-gray-700">Name</span>
-      <input class="form-input mt-1 w-full border-black border px-2 py-2" placeholder="Introduce nombre padre"
-        type="text" [(ngModel)]="nameParent">
-    </label>
-  </div>
-  <div class="flex space-x-4 justify-end mt-8 mr-10">
-    <div>
-      <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
-        (click)="addNewParent()">
-        Añadir
-      </button>
-    </div>
-    <div>
-      <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
-        (click)="newParent = !newParent">
-        Cancelar
-      </button>
-    </div>
-  </div>
-
+  <app-new-parent [newParent]="newParent" (emitParent)="addNewParent($event)"></app-new-parent>
 </div>
 
 <div *ngIf="newCare">
-  <div class="flex justify-center mt-4 space-x-4">
-    <label class="block mt-4">
-      <span class="text-gray-700">Cuidador</span>
-      <select class="form-select mt-1 block w-full border border-black px-2 py-2" [(ngModel)]="caretaker">
-        <option *ngFor=" let parent of parents" [ngValue]="parent">{{parent.name}}</option>
-      </select>
-    </label>
-    <label class="block mt-4">
-      <span class="text-gray-700">Deja hijo</span>
-      <select class="form-select mt-1 block w-full border border-black px-2 py-2" [(ngModel)]="parentName">
-        <option *ngFor="let parent of parents" [ngValue]="parent">{{parent.name}}</option>
-      </select>
-    </label>
-    <label class="block mt-4">
-      <span class="text-gray-700">Duracion (min)</span>
-      <input class="form-input mt-1 w-full border-black border px-2 py-2" placeholder="Introduce tiempo cuidado"
-        type="number" min="1" [(ngModel)]="newCareData.duration">
-    </label>
-    <label class="block mt-4">
-      <span class="text-gray-700">Fecha y Hora</span>
-      <input class="form-input mt-1 w-full border-black border px-2 py-2" placeholder="Introduce fecha cuidado"
-        type="datetime-local" [(ngModel)]="newCareData.startDate">
-    </label>
-    <label class="block mt-4">
-      <span class="text-gray-700">Observaciones</span>
-      <input class="form-input mt-1 w-full border-black border px-2 py-2" placeholder="Introduce observaciones"
-        type="text" [(ngModel)]="newCareData.observations">
-    </label>
-  </div>
-  <div class="flex space-x-4 justify-end mt-8 mr-10">
-    <div>
-      <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full" (click)="addNewCare()">
-        Añadir
-      </button>
-    </div>
-    <div>
-      <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
-        (click)="newCare = !newCare">
-        Cancelar
-      </button>
-    </div>
-  </div>
+  <app-new-care [parents]="parents" [newCare]="newCare" (emitCares)="addNewCare($event)"></app-new-care>
 </div>
