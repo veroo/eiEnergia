@@ -1,0 +1,194 @@
+swagger: "2.0" 
+info:
+  version: "1.0.0" 
+  title: "Care api" 
+  termsOfService: "http://swagger.io/terms/" 
+  license:
+    name: "Apache 2.0" 
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+# host: "localhost:8080" 
+# basePath: "/v1" 
+paths:
+  /cares:
+    get:
+      operationId: getCaresUsingGET 
+      summary: Get a list of cares 
+      description: Get a list of all cares realised 
+      produces:
+        - aplication/json
+      responses:
+        '200':
+          description: OK 
+          schema:
+            type: array 
+            items: 
+              $ref: '#/definitions/CareDto'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      tags:
+        - care
+    post:
+      tags:
+        - care 
+      summary: Add care 
+      description: Add a new care 
+      operationId: addCareUsingPOST 
+      consumes: 
+        - application/json 
+      produces: 
+        - application/json 
+      parameters: 
+        - in: body
+          name: addCare 
+          description: addCare 
+          required: true 
+          schema: 
+            $ref: '#/definitions/AddCareDto'
+      responses:
+        '201': 
+          description: Care created successfully 
+          schema: 
+            $ref: '#/definitions/CareDto' 
+        '401': 
+          description: Unauthorized 
+        '403': 
+          description: Forbidden 
+        '404': 
+          description: Not Found 
+      deprecated: false
+  /parents:
+    get: 
+      tags: 
+        - parent 
+      summary: Get parents 
+      description: Get parents 
+      operationId: getPeopleUsingGET 
+      produces: 
+        - application/json 
+      responses: 
+        '200': 
+          description: OK 
+          schema: 
+            type: array 
+            items: 
+              $ref: '#/definitions/ParentDto' 
+        '401': 
+          description: Unauthorized 
+        '403': 
+          description: Forbidden 
+        '404': 
+          description: Not Found 
+      deprecated: false 
+    post: 
+      tags: 
+        - parent 
+      summary: Add parent 
+      operationId: addParentUsingPOST 
+      consumes: 
+        - application/json 
+      produces: 
+        - application/json 
+      parameters: 
+        - in: body 
+          name: addParent 
+          description: addParent 
+          required: true 
+          schema: 
+            $ref: '#/definitions/AddParentDto' 
+      responses: 
+        '201': 
+          description: Parent added successfully 
+          schema: 
+            $ref: '#/definitions/ParentDto' 
+        '401': 
+          description: Unauthorized 
+        '403': 
+          description: Forbidden 
+        '404': 
+          description: Not Found 
+      deprecated: false
+definitions: 
+  AddCareDto: 
+    type: object 
+    properties: 
+      caretakerId: 
+        type: integer 
+        format: int64 
+        description: 'parent id who is taking care of the child' 
+      duration: 
+        type: integer 
+        format: int32 
+        description: 'care duration in minutes' 
+      observations: 
+        type: string 
+        description: 'care notes' 
+      parentId: 
+        type: integer 
+        format: int64
+        description: 'parent id of the child' 
+      startDate: 
+        type: string 
+        format: date-time 
+        description: 'date time when the care starts' 
+    required: 
+      - caretakerId 
+      - duration 
+      - observations 
+      - parentId 
+      - startDate 
+    title: AddCareDto 
+  AddParentDto: 
+    type: object 
+    properties: 
+      name: 
+        type: string 
+    required:
+      - name 
+    title: AddParentDto 
+  CareDto: 
+    type: object 
+    properties: 
+      caretakerId: 
+        type: integer 
+        format: int64 
+        description: 'parent id who is taking care of the child' 
+      caretakerName: 
+        type: string 
+        description: 'parent name is taking care of the child' 
+      duration: 
+        type: integer 
+        format: int32 
+        description: 'care duration in minutes' 
+      observations: 
+        type: string 
+        description: 'care notes' 
+      parentId: 
+        type: integer 
+        format: int64 
+        description: 'parent id of the child' 
+      parentName: 
+        type: string 
+        description: 'parent name of the child' 
+      startDate: 
+        type: string 
+        format: date-time 
+        description: 'date time when the care starts' 
+    title: CareDto 
+  ParentDto: 
+    type: object 
+    properties: 
+      id: 
+        type: integer 
+        format: int64 
+      name: 
+        type: string 
+        title: ParentDto
+# Added by API Auto Mocking Plugin
+host: virtserver.swaggerhub.com
+basePath: /clovis3/eEnergia/1.0.0
+schemes:
+ - https
